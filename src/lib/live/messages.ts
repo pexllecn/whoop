@@ -42,6 +42,12 @@ export type ServerMessage =
   | { type: 'packet'; id: number; t: number; uuid: string; hex: string; status: string; length: number }
   | { type: 'command_result'; name: string; ok: boolean; sequence?: number; ack?: string; hex?: string; error?: string }
   | { type: 'processed'; t: number; date: string }
+  | {
+      type: 'backlog';
+      hr: Array<{ t: number; bpm: number | null; rr: number[]; source: string }>;
+      stress: Array<{ t: number; score: number | null; reason: string; hr60: number | null; lnRmssd60: number | null; rmssd60: number | null }>;
+      packets: Array<{ id: number; t: number; uuid: string; hex: string; status: string; length: number }>;
+    }
   | { type: 'log'; level: 'debug' | 'info' | 'warn' | 'error'; message: string; t: number };
 
 export type ClientMessage =

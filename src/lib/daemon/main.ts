@@ -62,7 +62,10 @@ async function main(): Promise<void> {
       else if (message.type === 'recompute') daemon.processNow();
       else reply({ type: 'status', status: daemon.status() });
     },
-    (send) => send({ type: 'status', status: daemon.status() }),
+    (send) => {
+      send({ type: 'status', status: daemon.status() });
+      send(daemon.backlog());
+    },
   );
   await live.ready();
   daemon.setBroadcaster(live);

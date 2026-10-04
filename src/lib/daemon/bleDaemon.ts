@@ -56,6 +56,12 @@ export class BleDaemon {
   private lastProcessedDate: string | null = null;
   private processing = false;
   private readonly current: DaemonStatus;
+  /** Short history replayed to dashboards when they connect. */
+  private readonly recent = {
+    hr: [] as Array<{ t: number; bpm: number | null; rr: number[]; source: string }>,
+    stress: [] as Array<Extract<ServerMessage, { type: 'stress' }>>,
+    packets: [] as Array<Extract<ServerMessage, { type: 'packet' }>>,
+  };
 
   constructor(private readonly options: DaemonOptions) {
     this.settings = options.settings;
@@ -86,6 +92,15 @@ export class BleDaemon {
 
   status(): DaemonStatus {
     return { ...this.current };
+  }
+
+  backlog(): Extract<ServerMessage, { type: 'backlog' }> {
+    return {
+      type: 'backlog',
+      hr: [...this.recent.hr],
+      stress: this.recent.stress.map(({ type: _type, ...rest }) => rest),
+      packets: this.recent.packets.map(({ type: _type, ...rest }) => rest),
+    };
   }
 
   private log(level: 'debug' | 'info' | 'warn' | 'error', message: string): void {
@@ -256,7 +271,7 @@ export class BleDaemon {
     if (second !== this.packetBudget.second) this.packetBudget = { second, used: 0 };
     if (this.packetBudget.used++ < PACKETS_PER_SECOND) {
       const hex = Array.from(notification.bytes.subarray(0, 48), (b) => b.toString(16).padStart(2, '0')).join('');
-      this.broadcaster?.broadcast({
+      const packet: Extract<ServerMessage, { type: 'packet' }> = {
         type: 'packet',
         id: rawPacketId,
         t: notification.receivedAt,
@@ -264,12 +279,17 @@ export class BleDaemon {
         hex: notification.bytes.length > 48 ? `${hex}…` : hex,
         status: outcome.status,
         length: notification.bytes.length,
-      });
+      };
+      this.recent.packets = [packet, ...this.recent.packets].slice(0, 80);
+      this.broadcaster?.broadcast(packet);
     }
 
     for (const event of outcome.events) {
       if (event.type === 'heart_rate') {
         this.stress.addHeartRate(event.at, event.bpm, event.rrMs, event.source);
+        const cutoff = event.at - 10 * 60_000;
+        this.recent.hr.push({ t: event.at, bpm: event.bpm, rr: event.rrMs, source: event.source });
+        if (this.recent.hr[0]!.t < cutoff) this.recent.hr = this.recent.hr.filter((h) => h.t >= cutoff);
         this.broadcaster?.broadcast({ type: 'hr', t: event.at, bpm: event.bpm, rr: event.rrMs, source: event.source });
       } else if (event.type === 'battery') {
         this.current.batteryPercent = event.percent;
@@ -289,7 +309,7 @@ export class BleDaemon {
     if (this.current.state !== 'streaming') return;
     const now = Date.now();
     const result = this.stress.score(now);
-    this.broadcaster?.broadcast({
+    const message: Extract<ServerMessage, { type: 'stress' }> = {
       type: 'stress',
       t: now,
       score: result.score,
@@ -297,7 +317,10 @@ export class BleDaemon {
       hr60: result.hr60,
       lnRmssd60: result.lnRmssd60,
       rmssd60: result.rmssd60,
-    });
+    };
+    this.recent.stress.push(message);
+    if (this.recent.stress[0]!.t < now - 60 * 60_000) this.recent.stress = this.recent.stress.filter((m) => m.t >= now - 60 * 60_000);
+    this.broadcaster?.broadcast(message);
   }
 
   private async readBattery(): Promise<void> {

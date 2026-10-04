@@ -146,7 +146,6 @@ export class PacketDecoder {
     let frames = 0;
     let invalidFrames = 0;
     let mapped = 0;
-    let unmapped = 0;
     let firstPacketType: number | null = null;
     const errors: string[] = [];
 
@@ -199,7 +198,6 @@ export class PacketDecoder {
           break;
         }
         case 'unmapped':
-          unmapped++;
           events.push({
             type: 'unmapped_frame',
             at: receivedAt,

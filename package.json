@@ -8,10 +8,10 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "next dev --hostname 127.0.0.1 --port 3000",
-    "build": "next build && npm run build:daemon",
+    "dev": "NEXT_TELEMETRY_DISABLED=1 next dev --hostname 127.0.0.1 --port 3000",
+    "build": "NEXT_TELEMETRY_DISABLED=1 next build && npm run build:daemon",
     "build:daemon": "node scripts/build-daemon.mjs",
-    "start": "next start --hostname 127.0.0.1 --port 3000",
+    "start": "NEXT_TELEMETRY_DISABLED=1 next start --hostname 127.0.0.1 --port 3000",
     "daemon": "tsx src/lib/daemon/main.ts",
     "daemon:simulate": "tsx src/lib/daemon/main.ts --simulate",
     "db:generate": "drizzle-kit generate",
