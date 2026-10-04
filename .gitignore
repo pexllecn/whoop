@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# build output
+.next/
+dist/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# local data: SQLite databases, imports, protocol maps, logs
+data/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.db-shm
+*.db-wal
+
+# env
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+npm-debug.log*
