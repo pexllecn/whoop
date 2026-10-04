@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "19b285b8-a8e8-4070-8af2-361c61fff350",
+  "id": "db1ae733-c906-4ff5-bb65-76b592bb6f34",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "biometric_epochs": {
@@ -551,14 +551,6 @@
           "name": "hr_rr_samples_raw_idx",
           "columns": [
             "raw_packet_id"
-          ],
-          "isUnique": false
-        },
-        "hr_rr_samples_source_ts_idx": {
-          "name": "hr_rr_samples_source_ts_idx",
-          "columns": [
-            "source",
-            "ts"
           ],
           "isUnique": false
         }

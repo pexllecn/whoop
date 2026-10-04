@@ -141,8 +141,15 @@ export function planDay(date: string, seed: number, kind: DayKind = 'auto', prev
     if (rng.chance(0.15)) resolved = resolved === 'rest' ? 'moderate' : 'rest';
   }
 
+  // Sleep first, so morning activity is always scheduled after waking up.
+  const prevLoad = previous ? previous.workouts.reduce((sum, w) => sum + w.durationMinutes * w.intensity, 0) : 0;
+  const sleepDurationMinutes = Math.max(240, Math.round(rng.normal(478, 30) + Math.min(30, prevLoad * 0.15)));
+  const sleepStartMinute = Math.round(rng.normal(-55, 28));
+  const wakeMinute = sleepStartMinute + sleepDurationMinutes;
+
   const workouts: SimWorkout[] = [];
-  const workoutStart = rng.chance(0.5) ? rng.int(6 * 60 + 30, 8 * 60) : rng.int(17 * 60, 19 * 60);
+  const morning = rng.chance(0.5);
+  const workoutStart = morning ? Math.max(wakeMinute + 25, rng.int(6 * 60 + 30, 8 * 60)) : rng.int(17 * 60, 19 * 60);
   if (resolved === 'moderate') {
     const s = rng.pick([SPORTS.running, SPORTS.cycling, SPORTS.rowing]);
     workouts.push({ startMinute: workoutStart, durationMinutes: 45, intensity: rng.range(0.62, 0.7), ...s });
@@ -151,22 +158,24 @@ export function planDay(date: string, seed: number, kind: DayKind = 'auto', prev
     workouts.push({ startMinute: workoutStart, durationMinutes: rng.int(35, 50), intensity: rng.range(0.7, 0.78), ...s });
   } else if (resolved === 'endurance') {
     const s = rng.pick([SPORTS.cycling, SPORTS.running]);
-    workouts.push({ startMinute: 8 * 60 + rng.int(0, 60), durationMinutes: rng.int(150, 180), intensity: rng.range(0.78, 0.84), ...s });
+    workouts.push({
+      startMinute: Math.max(wakeMinute + 40, 8 * 60 + rng.int(0, 60)),
+      durationMinutes: rng.int(150, 180),
+      intensity: rng.range(0.78, 0.84),
+      ...s,
+    });
   }
 
   const lightActivity = [
-    { startMinute: 8 * 60 + rng.int(20, 50), durationMinutes: rng.int(12, 22) },
+    { startMinute: Math.max(wakeMinute + 15, 8 * 60 + rng.int(20, 50)), durationMinutes: rng.int(12, 22) },
     { startMinute: 12 * 60 + rng.int(10, 40), durationMinutes: rng.int(15, 25) },
     { startMinute: 18 * 60 + rng.int(30, 70), durationMinutes: rng.int(10, 20) },
   ].filter((bout) => !workouts.some((w) => bout.startMinute < w.startMinute + w.durationMinutes + 20 && w.startMinute < bout.startMinute + bout.durationMinutes + 20));
 
-  const prevLoad = previous ? previous.workouts.reduce((sum, w) => sum + w.durationMinutes * w.intensity, 0) : 0;
-  const sleepDurationMinutes = Math.round(rng.normal(445, 32) + Math.min(30, prevLoad * 0.15));
-  const sleepStartMinute = Math.round(rng.normal(-55, 28));
   const illness = rng.chance(0.03);
   const recoveryModifier = Math.max(
     -1,
-    Math.min(1, rng.normal(0.1, 0.35) - Math.min(0.6, prevLoad / 220) + (sleepDurationMinutes - 445) / 240 - (illness ? 0.6 : 0)),
+    Math.min(1, rng.normal(0.1, 0.35) - Math.min(0.6, prevLoad / 220) + (sleepDurationMinutes - 478) / 240 - (illness ? 0.6 : 0)),
   );
 
   const nap = rng.chance(0.12)
@@ -177,8 +186,8 @@ export function planDay(date: string, seed: number, kind: DayKind = 'auto', prev
   return {
     date,
     sleepStartMinute,
-    sleepDurationMinutes: Math.max(240, sleepDurationMinutes),
-    hypnogram: buildHypnogram(Math.max(240, sleepDurationMinutes), rng),
+    sleepDurationMinutes,
+    hypnogram: buildHypnogram(sleepDurationMinutes, rng),
     workouts,
     lightActivity,
     nap,

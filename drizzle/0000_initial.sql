@@ -85,7 +85,6 @@ CREATE TABLE `hr_rr_samples` (
 --> statement-breakpoint
 CREATE INDEX `hr_rr_samples_ts_idx` ON `hr_rr_samples` (`ts`);--> statement-breakpoint
 CREATE INDEX `hr_rr_samples_raw_idx` ON `hr_rr_samples` (`raw_packet_id`);--> statement-breakpoint
-CREATE INDEX `hr_rr_samples_source_ts_idx` ON `hr_rr_samples` (`source`,`ts`);--> statement-breakpoint
 CREATE TABLE `import_runs` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`source` text NOT NULL,

@@ -54,7 +54,6 @@ export const hrRrSamples = sqliteTable(
   (t) => [
     index('hr_rr_samples_ts_idx').on(t.ts),
     index('hr_rr_samples_raw_idx').on(t.rawPacketId),
-    index('hr_rr_samples_source_ts_idx').on(t.source, t.ts),
   ],
 );
 
