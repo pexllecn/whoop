@@ -68,10 +68,16 @@ export class BleError extends Error {
   }
 }
 
-/** Errors that mean the link is not encrypted / the strap is not bonded with this host. */
+/**
+ * Errors that mean the link is not encrypted / the strap is not bonded with
+ * this host. Web Bluetooth's SecurityError is deliberately excluded: Chrome
+ * raises it for blocklisted characteristics (e.g. the 0x2A25 serial number),
+ * which has nothing to do with bonding.
+ */
 export function isAuthenticationError(error: unknown): boolean {
   const text = error instanceof Error ? `${error.name} ${error.message}` : String(error);
-  return /insufficient (authentication|encryption|authorization)|not (paired|bonded)|authentication|encryption|SecurityError|0x0[5f]\b/i.test(text);
+  if (/blocklist/i.test(text)) return false;
+  return /insufficient (authentication|encryption|authorization)|(authentication|encryption) is insufficient|not (paired|bonded)|(authentication|encryption|pairing) (required|failed)/i.test(text);
 }
 
 export function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> {

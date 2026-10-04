@@ -17,7 +17,7 @@ OpenPulse never contacts WHOOP servers. Nothing leaves your computer unless you 
 | AA01 frame format: CRC16-Modbus header over bytes 0..5, CRC32 (zlib) payload, length and flags fields | **Verified** by test vectors. `AA0108000001E67123019101363E5C8D` checks out byte for byte (header CRC `0x71E6`, payload CRC `0x8D5C3E36`). |
 | `CLIENT_HELLO` frame | **Verified**: the frame builder reproduces it exactly. |
 | `0x2A37` heart rate + R-R parsing (`10407c03` gives 64 bpm and 871.09 ms) | **Verified** against the Bluetooth Heart Rate Service spec and the test vector. |
-| Raw-first storage, replay, importers, scoring pipeline, dashboard | Tested: 161 automated tests, plus end-to-end runs with the simulator. |
+| Raw-first storage, replay, importers, scoring pipeline, dashboard | Tested: 160+ automated tests, plus end-to-end runs with the simulator. |
 | Connecting to a **real** WHOOP 5.0 over noble or Web Bluetooth | **Not tested on hardware.** No strap was available while this was built. The transports implement the documented noble and Web Bluetooth APIs and were exercised only against the simulator. |
 | Proprietary commands other than hello, and proprietary record layouts (`0x28`, `0x2F` record 18, `0x33`/`0x34` IMU, `0x2B` record 21) | **Community-reported, unverified.** Opcodes and byte offsets come from the MIT-licensed [@dofek/whoop-ble](https://github.com/Asherlc/dofek) reverse engineering (see [NOTICE.md](NOTICE.md)). They are labelled *unverified* in the UI and are never sent automatically. |
 | Haptics and alarm opcodes | **Unknown.** Neither the spec nor the community source documents them, so OpenPulse does not guess. You can add them to a protocol map once you discover them (see below). |

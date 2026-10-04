@@ -5,7 +5,7 @@ import { BUILTIN_COMMANDS } from '@/lib/protocol/commands';
 import { SIG, WHOOP5 } from '@/lib/protocol/constants';
 import { PacketDecoder } from '@/lib/protocol/decoder';
 import { parseHeartRateMeasurement } from '@/lib/protocol/packetParser';
-import type { BleConnection, CharacteristicInfo } from '@/lib/ble/transport';
+import { isAuthenticationError, type BleConnection, type CharacteristicInfo } from '@/lib/ble/transport';
 
 const START = Date.UTC(2026, 9, 4, 9, 30, 0);
 
@@ -97,5 +97,22 @@ describe('BleSession handshake', () => {
   it('encodes simulator HRM values that round-trip', () => {
     const parsed = parseHeartRateMeasurement(encodeHeartRateMeasurement(64, [871.09375]));
     expect(parsed.ok && parsed.value.rrTicks).toEqual([892]);
+  });
+});
+
+describe('isAuthenticationError', () => {
+  it('recognises bonding failures from noble, CoreBluetooth and Web Bluetooth', () => {
+    expect(isAuthenticationError(new Error('Insufficient Authentication'))).toBe(true);
+    expect(isAuthenticationError(new Error('Encryption is insufficient.'))).toBe(true);
+    expect(isAuthenticationError(new Error('GATT Error: Not paired.'))).toBe(true);
+    expect(isAuthenticationError(new Error('Authentication failed'))).toBe(true);
+  });
+
+  it('does not treat blocklisted characteristics or ordinary failures as bonding problems', () => {
+    const blocked = new Error("readValue() called on blocklisted object marked exclude-reads.");
+    blocked.name = 'SecurityError';
+    expect(isAuthenticationError(blocked)).toBe(false);
+    expect(isAuthenticationError(new Error('read timed out after 5000 ms'))).toBe(false);
+    expect(isAuthenticationError(new Error('GATT operation failed for unknown reason.'))).toBe(false);
   });
 });
