@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+/*
+ * OpenPulse is dark-only. Chart colours were checked with the data-viz
+ * validator against the card surface #1a1a19:
+ *   sleep stages (awake, rem, light, deep) pass adjacent-pair CVD and
+ *   contrast checks; the hypnogram also encodes stage by row position.
+ *   HR zones use one blue ordinal ramp (monotone lightness).
+ *   Recovery bands and stress levels use the status palette and always ship
+ *   with a text label.
+ */
+@theme {
+  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-page: #0d0d0d;
+  --color-card: #1a1a19;
+  --color-raised: #232321;
+  --color-ink: #ffffff;
+  --color-ink-2: #c3c2b7;
+  --color-muted: #898781;
+  --color-grid: #2c2c2a;
+  --color-axis: #383835;
+  --color-hair: rgb(255 255 255 / 0.1);
+
+  --color-accent: #3987e5;
+  --color-strain: #d95926;
+  --color-sleep: #9085e9;
+  --color-hr: #e66767;
+
+  --color-good: #0ca30c;
+  --color-warn: #fab219;
+  --color-serious: #ec835a;
+  --color-bad: #d03b3b;
+
+  --color-stage-awake: #d95926;
+  --color-stage-rem: #9085e9;
+  --color-stage-light: #199e70;
+  --color-stage-deep: #3987e5;
+
+  --color-zone-0: #184f95;
+  --color-zone-1: #256abf;
+  --color-zone-2: #3987e5;
+  --color-zone-3: #6da7ec;
+  --color-zone-4: #9ec5f4;
+  --color-zone-5: #cde2fb;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--color-page);
+  color: var(--color-ink);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
