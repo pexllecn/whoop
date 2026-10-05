@@ -14,6 +14,8 @@
     "start": "NEXT_TELEMETRY_DISABLED=1 next start --hostname 127.0.0.1 --port 3000",
     "daemon": "tsx src/lib/daemon/main.ts",
     "daemon:simulate": "tsx src/lib/daemon/main.ts --simulate",
+    "ble:scan": "tsx src/lib/daemon/diagnose.ts scan",
+    "ble:probe": "tsx src/lib/daemon/diagnose.ts probe",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/lib/storage/cli.ts migrate",
     "replay": "tsx src/lib/storage/cli.ts replay",

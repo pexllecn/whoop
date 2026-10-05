@@ -201,11 +201,12 @@ export class NobleTransport implements BleTransport {
           }
         });
         const name = peripheral.advertisement.localName ?? null;
+        const device: DiscoveredDevice = { id: peripheral.id, name, rssi: peripheral.rssi, serviceUuids };
+        // Remember every peripheral so connect(id) works for anything seen, filtered or not.
+        this.peripherals.set(peripheral.id, peripheral);
         const matchesService = wanted.size === 0 || serviceUuids.some((u) => wanted.has(u));
         const matchesName = !nameFilter || (name?.toLowerCase().includes(nameFilter) ?? false);
-        if (!matchesService || !matchesName) return;
-        this.peripherals.set(peripheral.id, peripheral);
-        const device: DiscoveredDevice = { id: peripheral.id, name, rssi: peripheral.rssi, serviceUuids };
+        if (options.match ? !options.match(device) : !matchesService || !matchesName) return;
         if (!found.has(device.id)) {
           found.set(device.id, device);
           options.onDevice?.(device);

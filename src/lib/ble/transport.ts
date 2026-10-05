@@ -20,6 +20,8 @@ export interface ScanOptions {
   nameFilter?: string;
   /** Stop at the first matching device. */
   stopOnFirst?: boolean;
+  /** Custom predicate; when set it replaces the service/name filters (noble only). */
+  match?: (device: DiscoveredDevice) => boolean;
   onDevice?: (device: DiscoveredDevice) => void;
 }
 
